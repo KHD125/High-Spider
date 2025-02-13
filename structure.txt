@@ -1,8 +1,8 @@
 High-Spider/                   # Repository root folder
-├── main.py                    # All-in-one Scrapy spider and settings
+├── main.py                    # All-in-one Scrapy spider and settings (with local run block)
 ├── scrapy.cfg                 # Scrapy configuration file (points to module "main")
-├── scrapinghub.yml            # Zyte Scrapy Cloud configuration file (project: 798194)
-├── requirements.txt           # Required packages (scrapy, shub)
-├── setup.py                   # Setup file for module installation
-├── structure.txt              # This description of the project structure
-└── README.md                  # Project description and usage instructions
+├── scrapinghub.yml            # Zyte Scrapy Cloud configuration file (project ID: 798194)
+├── requirements.txt           # List of required packages (scrapy and shub)
+├── setup.py                   # Setup file to make the project installable with an entry point for Scrapy
+├── structure.txt              # Description of the project structure
+└── README.md                  # Project description and deployment instructions
