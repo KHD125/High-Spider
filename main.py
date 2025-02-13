@@ -1,3 +1,10 @@
+# Global Scrapy settings – these are imported by Zyte
+BOT_NAME = 'high_spider'
+SPIDER_MODULES = ['main']
+NEWSPIDER_MODULE = 'main'
+ROBOTSTXT_OBEY = True
+LOG_LEVEL = 'INFO'
+
 import scrapy
 from scrapy.crawler import CrawlerProcess
 from urllib.parse import urljoin
@@ -12,7 +19,7 @@ class GstinSpider(scrapy.Spider):
         self.keyword = keyword.lower()
 
     def parse(self, response):
-        # Yield the URL if the keyword is found.
+        # If the page contains the keyword, yield the URL.
         if self.keyword in response.text.lower():
             yield {"url": response.url}
 
@@ -22,14 +29,19 @@ class GstinSpider(scrapy.Spider):
             if absolute_url.startswith("https://gst.jamku.app"):
                 yield scrapy.Request(absolute_url, callback=self.parse)
 
-# For local testing only.
+# Local run block for testing
 if __name__ == "__main__":
     process = CrawlerProcess(settings={
-        'BOT_NAME': 'high_spider',
-        'ROBOTSTXT_OBEY': True,
-        'LOG_LEVEL': 'INFO',
+        'BOT_NAME': BOT_NAME,
+        'SPIDER_MODULES': SPIDER_MODULES,
+        'NEWSPIDER_MODULE': NEWSPIDER_MODULE,
+        'ROBOTSTXT_OBEY': ROBOTSTXT_OBEY,
+        'LOG_LEVEL': LOG_LEVEL,
         'FEEDS': {
-            'output.json': {'format': 'json', 'overwrite': True},
+            'output.json': {
+                'format': 'json',
+                'overwrite': True,
+            },
         },
     })
     process.crawl(GstinSpider, keyword="08041020")
