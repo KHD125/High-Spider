@@ -1,49 +1,45 @@
-# Global Scrapy settings – these are imported by Zyte
+# Global Scrapy settings – these variables are used by scrapy.cfg and setup.py
 BOT_NAME = 'high_spider'
 SPIDER_MODULES = ['main']
 NEWSPIDER_MODULE = 'main'
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False  # We're scraping search results, so we ignore robots.txt here.
 LOG_LEVEL = 'INFO'
 
 import scrapy
-from scrapy.crawler import CrawlerProcess
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
-class GstinSpider(scrapy.Spider):
-    name = "gstin_spider"
-    allowed_domains = ["gst.jamku.app"]
-    start_urls = ["https://gst.jamku.app/gstin/"]
+class SearchEngineSpider(scrapy.Spider):
+    name = "search_spider"
 
     def __init__(self, keyword="08041020", *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.keyword = keyword.lower()
+        self.keyword = keyword
+        # Build the Bing search query.
+        # Query: site:https://gst.jamku.app/gstin/ "08041020"
+        query = f'site:https://gst.jamku.app/gstin/ "{keyword}"'
+        # Construct Bing search URL (spaces replaced with +, quotes URL-encoded)
+        self.start_urls = [
+            "https://www.bing.com/search?q=" + query.replace(" ", "+").replace('"', "%22")
+        ]
 
     def parse(self, response):
-        # Check if this page is likely a GSTIN details page
-        if self.keyword in response.text.lower():
-            # Extract GSTIN from URL (last path component)
-            gstin = response.url.rstrip('/').split('/')[-1]
-            # The following selectors are examples.
-            # Inspect the page to adjust them to the correct elements.
-            owner = response.css("div.owner::text").get(default="Not Found").strip()
-            location = response.css("div.location::text").get(default="Not Found").strip()
-            compliance = response.css("div.compliance::text").get(default="Not Found").strip()
-            
-            yield {
-                "url": response.url,
-                "gstin": gstin,
-                "owner": owner,
-                "location": location,
-                "compliance": compliance,
-            }
-        # Follow internal links to crawl additional pages.
-        for href in response.css("a::attr(href)").getall():
-            absolute_url = urljoin(response.url, href)
-            if absolute_url.startswith("https://gst.jamku.app"):
-                yield scrapy.Request(absolute_url, callback=self.parse)
+        # Parse Bing search results: each result is in a <li class="b_algo"> element.
+        results = response.css("li.b_algo")
+        for result in results:
+            url = result.css("h2 a::attr(href)").get()
+            if url and url.startswith("https://gst.jamku.app/gstin/"):
+                # Extract the GSTIN number from the URL (last path component)
+                gstin = urlparse(url).path.rstrip("/").split("/")[-1]
+                yield {"url": url, "gstin": gstin}
+        # Follow the "Next" page link if available.
+        next_page = response.css("a.sb_pagN::attr(href)").get()
+        if next_page:
+            next_url = urljoin(response.url, next_page)
+            yield scrapy.Request(next_url, callback=self.parse)
 
 # For local testing only.
 if __name__ == "__main__":
+    from scrapy.crawler import CrawlerProcess
     process = CrawlerProcess(settings={
         'BOT_NAME': BOT_NAME,
         'SPIDER_MODULES': SPIDER_MODULES,
@@ -51,11 +47,8 @@ if __name__ == "__main__":
         'ROBOTSTXT_OBEY': ROBOTSTXT_OBEY,
         'LOG_LEVEL': LOG_LEVEL,
         'FEEDS': {
-            'output.json': {
-                'format': 'json',
-                'overwrite': True,
-            },
+            'output.json': {'format': 'json', 'overwrite': True},
         },
     })
-    process.crawl(GstinSpider, keyword="08041020")
+    process.crawl(SearchEngineSpider, keyword="08041020")
     process.start()
