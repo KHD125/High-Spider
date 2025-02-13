@@ -19,17 +19,30 @@ class GstinSpider(scrapy.Spider):
         self.keyword = keyword.lower()
 
     def parse(self, response):
-        # If the page contains the keyword, yield the URL.
+        # Check if this page is likely a GSTIN details page
         if self.keyword in response.text.lower():
-            yield {"url": response.url}
-
-        # Follow internal links within the allowed domain.
+            # Extract GSTIN from URL (last path component)
+            gstin = response.url.rstrip('/').split('/')[-1]
+            # The following selectors are examples.
+            # Inspect the page to adjust them to the correct elements.
+            owner = response.css("div.owner::text").get(default="Not Found").strip()
+            location = response.css("div.location::text").get(default="Not Found").strip()
+            compliance = response.css("div.compliance::text").get(default="Not Found").strip()
+            
+            yield {
+                "url": response.url,
+                "gstin": gstin,
+                "owner": owner,
+                "location": location,
+                "compliance": compliance,
+            }
+        # Follow internal links to crawl additional pages.
         for href in response.css("a::attr(href)").getall():
             absolute_url = urljoin(response.url, href)
             if absolute_url.startswith("https://gst.jamku.app"):
                 yield scrapy.Request(absolute_url, callback=self.parse)
 
-# Local run block for testing
+# For local testing only.
 if __name__ == "__main__":
     process = CrawlerProcess(settings={
         'BOT_NAME': BOT_NAME,
