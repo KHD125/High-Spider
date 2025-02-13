@@ -1,0 +1,13 @@
+High-Spider/                  # Repository root
+├── scrapy.cfg                # Scrapy configuration file
+├── scrapinghub.yml           # Zyte Scrapy Cloud configuration file
+├── README.md                 # Project README (optional)
+└── high_spider/              # Scrapy project folder (named same as your project)
+    ├── __init__.py
+    ├── items.py
+    ├── middlewares.py
+    ├── pipelines.py
+    ├── settings.py
+    └── spiders/
+         ├── __init__.py
+         └── gstin_spider.py   # Our sample spider
