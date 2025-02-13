@@ -1,8 +1,8 @@
-# Global Scrapy settings – these variables are used by scrapy.cfg and setup.py.
+# Global Scrapy settings – these module-level variables are used by scrapy.cfg and setup.py.
 BOT_NAME = 'high_spider'
 SPIDER_MODULES = ['main']
 NEWSPIDER_MODULE = 'main'
-ROBOTSTXT_OBEY = False  # We ignore robots.txt because we're scraping a search engine.
+ROBOTSTXT_OBEY = False  # We're scraping a search engine; ignore robots.txt.
 LOG_LEVEL = 'INFO'
 
 import scrapy
@@ -13,26 +13,41 @@ class BingSearchSpider(scrapy.Spider):
     
     def __init__(self, keyword="08041020", *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Build the Bing query: site:https://gst.jamku.app/gstin/ "08041020"
+        self.keyword = keyword
+        # Build the search query.
+        # Example: site:https://gst.jamku.app/gstin/ "08041020"
         query = f'site:https://gst.jamku.app/gstin/ "{keyword}"'
-        # Replace spaces with + and encode quotes as %22
+        # Construct the Bing search URL.
+        # Replace spaces with + and quotes with %22.
         self.start_urls = [
             "https://www.bing.com/search?q=" + query.replace(" ", "+").replace('"', "%22")
         ]
-
+        self.logger.info("Starting URL: " + self.start_urls[0])
+    
     def parse(self, response):
-        # Each Bing result is usually in a <li class="b_algo"> element.
+        self.logger.info("Parsing page: " + response.url)
+        # Extract each Bing result; they are usually in <li class="b_algo">
         results = response.css("li.b_algo")
+        self.logger.info(f"Found {len(results)} result items on this page.")
         for result in results:
             url = result.css("h2 a::attr(href)").get()
-            if url:
+            if url and url.startswith("https://gst.jamku.app/gstin/"):
+                # Yield only the URL.
                 yield {"url": url}
-        # Follow the "Next" page, if available.
+        
+        # Follow the "Next" page if available.
         next_page = response.css("a.sb_pagN::attr(href)").get()
+        if not next_page:
+            # Fallback selector if Bing changes the title attribute.
+            next_page = response.css("a[title='Next page']::attr(href)").get()
         if next_page:
-            yield scrapy.Request(urljoin(response.url, next_page), callback=self.parse)
+            next_url = urljoin(response.url, next_page)
+            self.logger.info("Following next page: " + next_url)
+            yield scrapy.Request(next_url, callback=self.parse)
+        else:
+            self.logger.info("No next page found.")
 
-# For local testing only.
+# Local testing block.
 if __name__ == "__main__":
     from scrapy.crawler import CrawlerProcess
     process = CrawlerProcess(settings={
