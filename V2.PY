@@ -3307,10 +3307,16 @@ class FilterEngine:
                 'position_tiers': [],
                 'position_range': (0, 100),
                 'performance_tiers': [],
-                'performance_custom_range': False,
-                'performance_1d_range': (-100, 100),
-                'performance_7d_range': (-100, 100),
-                'performance_30d_range': (-100, 100),
+                'performance_custom_range': (-100, 500),
+                'ret_1d_range': (-50.0, 100.0),
+                'ret_3d_range': (-50.0, 150.0),
+                'ret_7d_range': (-50.0, 200.0),
+                'ret_30d_range': (-50.0, 500.0),
+                'ret_3m_range': (-70.0, 300.0),
+                'ret_6m_range': (-80.0, 500.0),
+                'ret_1y_range': (-90.0, 1000.0),
+                'ret_3y_range': (-95.0, 2000.0),
+                'ret_5y_range': (-99.0, 5000.0),
                 'min_pe': None,
                 'max_pe': None,
                 'require_fundamental_data': False,
@@ -3392,6 +3398,9 @@ class FilterEngine:
         if filters.get('require_fundamental_data'): count += 1
         if filters.get('wave_states'): count += 1
         if filters.get('wave_strength_range') != (0, 100): count += 1
+        if filters.get('performance_tiers'): count += 1
+        if filters.get('position_tiers'): count += 1
+        if filters.get('volume_tiers'): count += 1
         if filters.get('position_score_range') != (0, 100): count += 1
         if filters.get('volume_score_range') != (0, 100): count += 1
         if filters.get('momentum_score_range') != (0, 100): count += 1
@@ -4774,6 +4783,12 @@ class SessionStateManager:
                 filters['wave_states'] = state['wave_states']
             if state.get('wave_strength_range') != (0, 100):
                 filters['wave_strength_range'] = state['wave_strength_range']
+            if state.get('performance_tiers'):
+                filters['performance_tiers'] = state['performance_tiers']
+            if state.get('position_tiers'):
+                filters['position_tiers'] = state['position_tiers']
+            if state.get('volume_tiers'):
+                filters['volume_tiers'] = state['volume_tiers']
             if state.get('position_score_range') != (0, 100):
                 filters['position_score_range'] = state['position_score_range']
             if state.get('volume_score_range') != (0, 100):
