@@ -3475,7 +3475,8 @@ class FilterEngine:
             
             # Additional filter-related keys
             'display_count_select', 'sort_by_select', 'export_template_radio',
-            'wave_sensitivity', 'show_sensitivity_details', 'show_market_regime'
+            'wave_sensitivity', 'show_sensitivity_details', 'show_market_regime',
+            'score_component_expander'
         ]
         
         # Delete each known widget key if it exists
@@ -5699,119 +5700,121 @@ def main():
         if selected_industries:
             filters['industries'] = selected_industries
         
-        # Score filter with callback
-        min_score = st.slider(
-            "Minimum Master Score",
-            min_value=0,
-            max_value=100,
-            value=st.session_state.filter_state.get('min_score', 0),
-            step=5,
-            help="Filter stocks by minimum score",
-            key="min_score_slider",
-            on_change=sync_min_score  # SYNC ON CHANGE
-        )
-        
-        if min_score > 0:
-            filters['min_score'] = min_score
-        
-        # 🎯 Intelligence Score Sliders
-        st.subheader("🎯 Intelligence Score Filters")
-        
-        # Position Score Slider
-        if 'position_score' in ranked_df_display.columns:
-            position_score_range = st.slider(
-                "Position Score",
+        # 🎯 Score Component - Professional Expandable Section
+        with st.expander("🎯 Score Component", expanded=False):
+            st.write("**🎯 Score Component Filters**")
+            st.write("Configure individual score thresholds for precise filtering")
+            
+            # Minimum Master Score
+            min_score = st.slider(
+                "Minimum Master Score",
                 min_value=0,
                 max_value=100,
-                value=st.session_state.filter_state.get('position_score_range', (0, 100)),
+                value=st.session_state.filter_state.get('min_score', 0),
                 step=5,
-                help="Filter stocks by position score (0-100). Higher scores indicate better price positioning relative to highs/lows.",
-                key="position_score_slider",
-                on_change=sync_position_score
+                help="Filter stocks by minimum master score (0-100). Higher scores indicate better overall ranking.",
+                key="min_score_slider",
+                on_change=sync_min_score
             )
             
-            if position_score_range != (0, 100):
-                filters['position_score_range'] = position_score_range
-        
-        # Volume Score Slider
-        if 'volume_score' in ranked_df_display.columns:
-            volume_score_range = st.slider(
-                "Volume Score",
-                min_value=0,
-                max_value=100,
-                value=st.session_state.filter_state.get('volume_score_range', (0, 100)),
-                step=5,
-                help="Filter stocks by volume score (0-100). Higher scores indicate stronger volume activity and liquidity.",
-                key="volume_score_slider",
-                on_change=sync_volume_score
-            )
+            if min_score > 0:
+                filters['min_score'] = min_score
             
-            if volume_score_range != (0, 100):
-                filters['volume_score_range'] = volume_score_range
-        
-        # Momentum Score Slider
-        if 'momentum_score' in ranked_df_display.columns:
-            momentum_score_range = st.slider(
-                "Momentum Score",
-                min_value=0,
-                max_value=100,
-                value=st.session_state.filter_state.get('momentum_score_range', (0, 100)),
-                step=5,
-                help="Filter stocks by momentum score (0-100). Higher scores indicate stronger price momentum across multiple timeframes.",
-                key="momentum_score_slider",
-                on_change=sync_momentum_score
-            )
+            # Position Score Slider
+            if 'position_score' in ranked_df_display.columns:
+                position_score_range = st.slider(
+                    "Position Score",
+                    min_value=0,
+                    max_value=100,
+                    value=st.session_state.filter_state.get('position_score_range', (0, 100)),
+                    step=5,
+                    help="Filter stocks by position score (0-100). Higher scores indicate better price positioning relative to highs/lows.",
+                    key="position_score_slider",
+                    on_change=sync_position_score
+                )
+                
+                if position_score_range != (0, 100):
+                    filters['position_score_range'] = position_score_range
             
-            if momentum_score_range != (0, 100):
-                filters['momentum_score_range'] = momentum_score_range
-        
-        # Acceleration Score Slider
-        if 'acceleration_score' in ranked_df_display.columns:
-            acceleration_score_range = st.slider(
-                "Acceleration Score",
-                min_value=0,
-                max_value=100,
-                value=st.session_state.filter_state.get('acceleration_score_range', (0, 100)),
-                step=5,
-                help="Filter stocks by acceleration score (0-100). Higher scores indicate increasing momentum and rate of change.",
-                key="acceleration_score_slider",
-                on_change=sync_acceleration_score
-            )
+            # Volume Score Slider
+            if 'volume_score' in ranked_df_display.columns:
+                volume_score_range = st.slider(
+                    "Volume Score",
+                    min_value=0,
+                    max_value=100,
+                    value=st.session_state.filter_state.get('volume_score_range', (0, 100)),
+                    step=5,
+                    help="Filter stocks by volume score (0-100). Higher scores indicate stronger volume activity and liquidity.",
+                    key="volume_score_slider",
+                    on_change=sync_volume_score
+                )
+                
+                if volume_score_range != (0, 100):
+                    filters['volume_score_range'] = volume_score_range
             
-            if acceleration_score_range != (0, 100):
-                filters['acceleration_score_range'] = acceleration_score_range
-        
-        # Breakout Score Slider
-        if 'breakout_score' in ranked_df_display.columns:
-            breakout_score_range = st.slider(
-                "Breakout Score",
-                min_value=0,
-                max_value=100,
-                value=st.session_state.filter_state.get('breakout_score_range', (0, 100)),
-                step=5,
-                help="Filter stocks by breakout score (0-100). Higher scores indicate higher probability of price breakouts.",
-                key="breakout_score_slider",
-                on_change=sync_breakout_score
-            )
+            # Momentum Score Slider
+            if 'momentum_score' in ranked_df_display.columns:
+                momentum_score_range = st.slider(
+                    "Momentum Score",
+                    min_value=0,
+                    max_value=100,
+                    value=st.session_state.filter_state.get('momentum_score_range', (0, 100)),
+                    step=5,
+                    help="Filter stocks by momentum score (0-100). Higher scores indicate stronger price momentum across multiple timeframes.",
+                    key="momentum_score_slider",
+                    on_change=sync_momentum_score
+                )
+                
+                if momentum_score_range != (0, 100):
+                    filters['momentum_score_range'] = momentum_score_range
             
-            if breakout_score_range != (0, 100):
-                filters['breakout_score_range'] = breakout_score_range
-        
-        # RVOL Score Slider
-        if 'rvol_score' in ranked_df_display.columns:
-            rvol_score_range = st.slider(
-                "RVOL Score",
-                min_value=0,
-                max_value=100,
-                value=st.session_state.filter_state.get('rvol_score_range', (0, 100)),
-                step=5,
-                help="Filter stocks by RVOL score (0-100). Higher scores indicate stronger relative volume activity.",
-                key="rvol_score_slider",
-                on_change=sync_rvol_score
-            )
+            # Acceleration Score Slider
+            if 'acceleration_score' in ranked_df_display.columns:
+                acceleration_score_range = st.slider(
+                    "Acceleration Score",
+                    min_value=0,
+                    max_value=100,
+                    value=st.session_state.filter_state.get('acceleration_score_range', (0, 100)),
+                    step=5,
+                    help="Filter stocks by acceleration score (0-100). Higher scores indicate increasing momentum and rate of change.",
+                    key="acceleration_score_slider",
+                    on_change=sync_acceleration_score
+                )
+                
+                if acceleration_score_range != (0, 100):
+                    filters['acceleration_score_range'] = acceleration_score_range
             
-            if rvol_score_range != (0, 100):
-                filters['rvol_score_range'] = rvol_score_range
+            # Breakout Score Slider
+            if 'breakout_score' in ranked_df_display.columns:
+                breakout_score_range = st.slider(
+                    "Breakout Score",
+                    min_value=0,
+                    max_value=100,
+                    value=st.session_state.filter_state.get('breakout_score_range', (0, 100)),
+                    step=5,
+                    help="Filter stocks by breakout score (0-100). Higher scores indicate higher probability of price breakouts.",
+                    key="breakout_score_slider",
+                    on_change=sync_breakout_score
+                )
+                
+                if breakout_score_range != (0, 100):
+                    filters['breakout_score_range'] = breakout_score_range
+            
+            # RVOL Score Slider
+            if 'rvol_score' in ranked_df_display.columns:
+                rvol_score_range = st.slider(
+                    "RVOL Score",
+                    min_value=0,
+                    max_value=100,
+                    value=st.session_state.filter_state.get('rvol_score_range', (0, 100)),
+                    step=5,
+                    help="Filter stocks by RVOL score (0-100). Higher scores indicate stronger relative volume activity.",
+                    key="rvol_score_slider",
+                    on_change=sync_rvol_score
+                )
+                
+                if rvol_score_range != (0, 100):
+                    filters['rvol_score_range'] = rvol_score_range
         
         # 📈 Performance Intelligence Filter
         available_return_cols = [col for col in ['ret_1d', 'ret_3d', 'ret_7d', 'ret_30d', 'ret_3m', 'ret_6m', 'ret_1y', 'ret_3y', 'ret_5y'] if col in ranked_df_display.columns]
