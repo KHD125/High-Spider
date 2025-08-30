@@ -6251,10 +6251,15 @@ def main():
                     "🎯 Custom Range"
                 ]
                 
+                # Get current performance tiers with fallback to empty list
+                current_performance_tiers = st.session_state.filter_state.get('performance_tiers', [])
+                if not isinstance(current_performance_tiers, list):
+                    current_performance_tiers = []
+                
                 performance_tiers = st.multiselect(
                     "📈 Performance Filter",
                     options=performance_options,
-                    default=st.session_state.filter_state.get('performance_tiers', []),
+                    default=current_performance_tiers,
                     key='performance_tier_multiselect_intelligence',
                     on_change=sync_performance_tier,
                     help="Select performance categories or use Custom Range for precise control. Thresholds optimized for Indian markets."
@@ -6269,10 +6274,15 @@ def main():
                 st.write("🌊 Volume Activity Tiers")
                 # Volume tier multiselect with custom range option
                 volume_tier_options = list(CONFIG.TIERS['volume_tiers'].keys()) + ["🎯 Custom RVOL Range"]
+                # Get current volume tiers with fallback to empty list
+                current_volume_tiers = st.session_state.filter_state.get('volume_tiers', [])
+                if not isinstance(current_volume_tiers, list):
+                    current_volume_tiers = []
+                
                 volume_tiers = st.multiselect(
                     "🌊 Volume Activity Tiers",
                     options=volume_tier_options,
-                    default=st.session_state.filter_state.get('volume_tiers', []),
+                    default=current_volume_tiers,
                     key='volume_tier_multiselect_intelligence',
                     on_change=sync_volume_tier,
                     help="Select volume activity tiers or use Custom RVOL Range for precise control"
@@ -6287,10 +6297,15 @@ def main():
                 st.write("🌍 Position Tiers")
                 # Position tier multiselect with custom range option
                 position_tier_options = list(CONFIG.TIERS['position_tiers'].keys()) + ["🎯 Custom Position Range"]
+                # Get current position tiers with fallback to empty list
+                current_position_tiers = st.session_state.filter_state.get('position_tiers', [])
+                if not isinstance(current_position_tiers, list):
+                    current_position_tiers = []
+                
                 position_tiers = st.multiselect(
                     "🌍 Position Tiers",
                     options=position_tier_options,
-                    default=st.session_state.filter_state.get('position_tiers', []),
+                    default=current_position_tiers,
                     key='position_tier_multiselect_intelligence',
                     on_change=sync_position_tier,
                     help="Select position tiers or use Custom Position Range for precise control"
@@ -6450,6 +6465,9 @@ def main():
             # Use both FilterEngine and SessionStateManager clear methods
             FilterEngine.clear_all_filters()
             SessionStateManager.clear_filters()
+            
+            # Force widget reset by adding a timestamp
+            st.session_state.widget_reset_timestamp = time.time()
             
             st.success("✅ All filters cleared!")
             time.sleep(0.3)
