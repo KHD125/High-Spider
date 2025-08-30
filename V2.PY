@@ -3787,17 +3787,17 @@ class FilterEngine:
         custom_range_selected = 'performance_tiers' in filters and any("Custom Range" in tier for tier in filters['performance_tiers'])
         
         if custom_range_selected:
-            # Define default ranges for each timeframe (MUST MATCH UI EXACTLY)
+            # OLD VERSION - More Realistic Defaults
             default_ranges = {
-                'ret_1d_range': (2.0, 100.0),
-                'ret_3d_range': (3.0, 150.0),
-                'ret_7d_range': (5.0, 200.0),
-                'ret_30d_range': (10.0, 500.0),
-                'ret_3m_range': (15.0, 300.0),
-                'ret_6m_range': (20.0, 2000.0),
-                'ret_1y_range': (25.0, 5000.0),
-                'ret_3y_range': (50.0, 10000.0),
-                'ret_5y_range': (75.0, 20000.0)
+                'ret_1d_range': (2.0, 100.0),      # Shows stocks up 2%+ today
+                'ret_3d_range': (3.0, 150.0),      # Shows stocks up 3%+ over 3 days  
+                'ret_7d_range': (5.0, 200.0),      # Shows stocks up 5%+ this week
+                'ret_30d_range': (10.0, 500.0),    # Shows stocks up 10%+ this month
+                'ret_3m_range': (15.0, 300.0),     # Shows stocks up 15%+ over 3 months
+                'ret_6m_range': (20.0, 2000.0),    # Shows stocks up 20%+ over 6 months
+                'ret_1y_range': (25.0, 5000.0),    # Shows stocks up 25%+ over 1 year
+                'ret_3y_range': (50.0, 10000.0),   # Shows stocks up 50%+ over 3 years
+                'ret_5y_range': (75.0, 20000.0)    # Shows stocks up 75%+ over 5 years
             }
             
             # Only apply filters for ranges that have been modified from defaults
@@ -6222,7 +6222,6 @@ def main():
                     elif rvol_score_selection == "🔴 Weak (< 40)":
                         filters['rvol_score_range'] = (0, 39)
         
-        # 🧠 Intelligence Filter - Combined Section
         # 📈 Performance Intelligence Filter
         available_return_cols = [col for col in ['ret_1d', 'ret_3d', 'ret_7d', 'ret_30d', 'ret_3m', 'ret_6m', 'ret_1y', 'ret_3y', 'ret_5y'] if col in ranked_df_display.columns]
         if available_return_cols:
