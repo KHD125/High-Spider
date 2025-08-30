@@ -5702,8 +5702,6 @@ def main():
         
         # 🎯 Score Component - Professional Expandable Section
         with st.expander("🎯 Score Component", expanded=False):
-            st.write("**🎯 Score Component Filters**")
-            st.write("Configure individual score thresholds for precise filtering")
             
             # Minimum Master Score
             min_score = st.slider(
@@ -6222,17 +6220,12 @@ def main():
             if wave_strength_range != (0, 100):
                 filters['wave_strength_range'] = wave_strength_range
         
-        # 🧠 Intelligence Filters Section
-        st.subheader("🧠 Intelligence Filters")
-        
-        # 📈 Performance Intelligence
-        with st.expander("📈 Performance Intelligence", expanded=False):
-            st.write("**📈 Performance Filter**")
-            st.write("Choose options")
-            
-            # Performance Intelligence Filter (reusing existing logic)
+        # 🧠 Intelligence Filter - Combined Section
+        with st.expander("🧠 Intelligence Filter", expanded=False):
+            # 📈 Performance Intelligence
             available_return_cols = [col for col in ['ret_1d', 'ret_3d', 'ret_7d', 'ret_30d', 'ret_3m', 'ret_6m', 'ret_1y', 'ret_3y', 'ret_5y'] if col in ranked_df_display.columns]
             if available_return_cols:
+                st.write("**📈 Performance Intelligence**")
                 # PROFESSIONAL PERFORMANCE TIER OPTIONS WITH PRACTICAL THRESHOLDS
                 performance_options = [
                     # Short-term momentum (Practical thresholds for Indian markets)
@@ -6267,15 +6260,11 @@ def main():
                 
                 if performance_tiers:
                     filters['performance_tiers'] = performance_tiers
-        
-        # 📊 Volume Intelligence
-        with st.expander("📊 Volume Intelligence", expanded=False):
-            st.write("**📊 Volume Intelligence**")
-            st.write("🌊 Volume Activity Tiers")
-            st.write("Choose options")
             
-            # Volume Intelligence Filter (reusing existing logic)
+            # 📊 Volume Intelligence
             if 'volume_tier' in ranked_df_display.columns or 'rvol' in ranked_df_display.columns:
+                st.write("**📊 Volume Intelligence**")
+                st.write("🌊 Volume Activity Tiers")
                 # Volume tier multiselect with custom range option
                 volume_tier_options = list(CONFIG.TIERS['volume_tiers'].keys()) + ["🎯 Custom RVOL Range"]
                 volume_tiers = st.multiselect(
@@ -6289,15 +6278,12 @@ def main():
                 
                 if volume_tiers:
                     filters['volume_tiers'] = volume_tiers
-        
-        # 🎯 Position Intelligence
-        with st.expander("🎯 Position Intelligence", expanded=False):
-            st.write("**🎯 Position Intelligence**")
-            st.write("🌍 Position Tiers")
-            st.write("Choose options")
             
-            # Position Intelligence Filter (reusing existing logic)
+            # 🎯 Position Intelligence
             if 'position_tier' in ranked_df_display.columns:
+                st.write("**🎯 Position Intelligence**")
+                st.write("🌍 Position Tiers")
+                # Position tier multiselect with custom range option
                 position_tier_options = list(CONFIG.TIERS['position_tiers'].keys()) + ["🎯 Custom Position Range"]
                 position_tiers = st.multiselect(
                     "🌍 Position Tiers",
